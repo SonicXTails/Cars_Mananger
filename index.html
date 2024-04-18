@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Менеджер автомобилей</title>
+<style>
+  @keyframes gradientChange {
+    0% {
+      color: white;
+    }
+    50% {
+      color: #1e90ff;
+    }
+    100% {
+      color: white;
+    }
+  }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+  
+    h1 {
+      margin-bottom: 20px;
+      animation: gradientChange 3s infinite;
+    }
+  
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    label {
+      margin-bottom: 5px;
+    }
+  
+    input, select {
+      width: 250px; 
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+  
+    .edit-form {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  
+    .edit-form input {
+      margin-bottom: 10px;
+    }
+  </style>
+  </head>
+  <body>
+  <h1>Менеджер автомобилей</h1>
+  
+  <form id="car-form">
+    <label for="brand">Марка:</label>
+    <input type="text" id="brand" required><br>
+  
+    <label for="model">Модель:</label>
+    <input type="text" id="model" required><br>
+  
+    <label for="year">Год выпуска:</label>
+    <input type="number" id="year" required><br>
+  
+    <label for="color">Цвет:</label>
+    <input type="text" id="color" required><br>
+  
+    <label for="mileage">Пробег:</label>
+    <input type="number" id="mileage" required><br>
+  
+    <button type="submit">Добавить автомобиль</button>
+  </form>
+  
+  <div id="car-list">
+    <!-- Здесь отображаются автомобили -->
+  </div>
+  
+  <!-- Форма редактирования -->
+  <div id="edit-form" class="edit-form">
+    <h2>Редактировать автомобиль</h2>
+    <label for="edit-brand">Марка:</label>
+    <input type="text" id="edit-brand"><br>
+  
+    <label for="edit-model">Модель:</label>
+    <input type="text" id="edit-model"><br>
+  
+    <label for="edit-year">Год выпуска:</label>
+    <input type="number" id="edit-year"><br>
+  
+    <label for="edit-color">Цвет:</label>
+    <input type="text" id="edit-color"><br>
+  
+    <label for="edit-mileage">Пробег:</label>
+    <input type="number" id="edit-mileage"><br>
+  
+    <button id="edit-submit">Сохранить</button>
+    <button id="edit-cancel">Отмена</button>
+  </div>
+
+<script>
+  // Конструктор объектов для автомобилей
+  function Car(brand, model, year, color, mileage) {
+    this.brand = brand;
+    this.model = model;
+    this.year = year;
+    this.color = color;
+    this.mileage = mileage;
+  }
+
+  // Метод для вывода информации об автомобиле
+  Car.prototype.getInfo = function() {
+    return `${this.brand} ${this.model}, ${this.year}, ${this.color}, ${this.mileage} км`;
+  };
+
+  // Функция для добавления автомобиля
+  function addCar(event) {
+    event.preventDefault();
+    const brand = document.getElementById('brand').value;
+    const model = document.getElementById('model').value;
+    const year = document.getElementById('year').value;
+    const color = document.getElementById('color').value;
+    const mileage = document.getElementById('mileage').value;
+
+    const car = new Car(brand, model, year, color, mileage);
+    cars.push(car);
+    displayCars();
+    document.getElementById('car-form').reset();
+  }
+
+  // Функция для удаления автомобиля
+  function deleteCar(index) {
+    cars.splice(index, 1);
+    displayCars();
+  }
+
+  // Функция для редактирования автомобиля
+  function editCar(index) {
+    const car = cars[index];
+    document.getElementById('edit-brand').value = car.brand;
+    document.getElementById('edit-model').value = car.model;
+    document.getElementById('edit-year').value = car.year;
+    document.getElementById('edit-color').value = car.color;
+    document.getElementById('edit-mileage').value = car.mileage;
+    currentIndex = index;
+    document.getElementById('edit-form').style.display = 'block';
+  }
+
+  // Функция для сохранения изменений
+  function saveChanges() {
+    const car = cars[currentIndex];
+    car.brand = document.getElementById('edit-brand').value;
+    car.model = document.getElementById('edit-model').value;
+    car.year = document.getElementById('edit-year').value;
+    car.color = document.getElementById('edit-color').value;
+    car.mileage = document.getElementById('edit-mileage').value;
+    displayCars();
+    document.getElementById('edit-form').style.display = 'none';
+  }
+
+  // Функция для отмены редактирования
+  function cancelEdit() {
+    document.getElementById('edit-form').style.display = 'none';
+  }
+
+  // Функция для отображения списка автомобилей
+  function displayCars() {
+    const carList = document.getElementById('car-list');
+    carList.innerHTML = '';
+    cars.forEach(function(car, index) {
+      const carItem = document.createElement('div');
+      const carInfo = document.createElement('p');
+      carInfo.textContent = car.getInfo();
+      carItem.appendChild(carInfo);
+
+      // Кнопка редактирования
+      const editButton = document.createElement('button');
+      editButton.textContent = 'Редактировать';
+      editButton.addEventListener('click', function() {
+        editCar(index);
+      });
+      carItem.appendChild(editButton);
+
+      // Кнопка удаления
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Удалить';
+      deleteButton.addEventListener('click', function() {
+        deleteCar(index);
+      });
+      carItem.appendChild(deleteButton);
+
+      carList.appendChild(carItem);
+    });
+  }
+
+  const cars = [];
+  let currentIndex = -1; // Индекс текущего редактируемого автомобиля
+
+  document.getElementById('car-form').addEventListener('submit', addCar);
+
+  document.getElementById('edit-submit').addEventListener('click', saveChanges);
+  document.getElementById('edit-cancel').addEventListener('click', cancelEdit);
+
+  displayCars();
+</script>
+
+</body>
+</html>
